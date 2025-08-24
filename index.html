@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>𝔼ℕ𝔾 𝕆𝕄𝔸ℝ - مسار تعلم البرمجة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+        
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #0a0a0a;
+            color: #e5e5e5;
+            scroll-behavior: smooth;
+        }
+        
+        .blood-text {
+            color: #d10000;
+            text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000;
+            position: relative;
+        }
+        
+        .blood-text::after {
+            content: "";
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #d10000, transparent);
+        }
+        
+        .blood-drip {
+            position: relative;
+        }
+        
+        .blood-drip::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 15px;
+            background: linear-gradient(to bottom, #d10000, transparent);
+        }
+        
+        .stage-card {
+            transition: all 0.3s ease;
+            border: 1px solid #333;
+        }
+        
+        .stage-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(209, 0, 0, 0.3);
+            border-color: #d10000;
+        }
+        
+        .progress-bar {
+            height: 5px;
+            background-color: #333;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #d10000, #ff4d4d);
+            transition: width 0.5s ease;
+        }
+        
+        .task-item {
+            border-left: 3px solid #333;
+            transition: all 0.3s ease;
+        }
+        
+        .task-item:hover {
+            border-left-color: #d10000;
+            background-color: rgba(209, 0, 0, 0.05);
+        }
+        
+        .completed {
+            color: #00d100;
+        }
+        
+        .locked {
+            opacity: 0.6;
+            filter: grayscale(0.8);
+            pointer-events: none;
+        }
+        
+        .nav-link {
+            position: relative;
+        }
+        
+        .nav-link::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #d10000;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .active-nav::after {
+            width: 100%;
+        }
+        
+        .blood-drop {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #d10000;
+            border-radius: 50% 0 50% 50%;
+            transform: rotate(45deg);
+            animation: drip 3s infinite;
+        }
+        
+        @keyframes drip {
+            0% {
+                transform: translateY(0) rotate(45deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100px) rotate(45deg);
+                opacity: 0;
+            }
+        }
+        
+        .stage-details {
+            display: none;
+        }
+        
+        .stage-details.active {
+            display: block;
+        }
+        
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .mobile-menu.open {
+            transform: translateX(0);
+        }
+        
+        .stage-navigation {
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #d10000 #333;
+        }
+        
+        .stage-navigation::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .stage-navigation::-webkit-scrollbar-track {
+            background: #333;
+            border-radius: 10px;
+        }
+        
+        .stage-navigation::-webkit-scrollbar-thumb {
+            background: #d10000;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Blood drops decoration -->
+    <div id="blood-drops"></div>
+    
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="mobile-menu fixed inset-y-0 right-0 w-64 bg-black z-50 p-6 border-l border-gray-800">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-bold blood-text">𝔼ℕ𝔾 𝕆𝕄𝔸ℝ</h1>
+            <button id="close-menu" class="text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <nav class="flex flex-col space-y-6">
+            <a href="#home" class="nav-link active-nav text-lg">الرئيسية</a>
+            <a href="#stages" class="nav-link text-lg">المراحل</a>
+            <a href="#contact" class="nav-link text-lg">تواصل معنا</a>
+        </nav>
+    </div>
+    
+    <!-- Header -->
+    <header class="bg-black py-4 px-6 border-b border-gray-800 sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center">
+                <h1 class="text-3xl font-bold blood-text blood-drip">𝔼ℕ𝔾 𝕆𝕄𝔸ℝ</h1>
+            </div>
+            <nav class="hidden md:flex space-x-8 space-x-reverse">
+                <a href="#home" class="nav-link active-nav">الرئيسية</a>
+                <a href="#stages" class="nav-link">المراحل</a>
+                <a href="#contact" class="nav-link">تواصل معنا</a>
+            </nav>
+            <button id="open-menu" class="md:hidden text-white">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main>
+        <!-- Home Section -->
+        <section id="home" class="py-16 px-6">
+            <div class="container mx-auto text-center">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6 blood-text">مسار تعلم البرمجة الاحترافي</h2>
+                <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
+                    أهلًا بكم في موقع العلم والتأسيس، انتظروا باقي المواقع والتطبيقات. جميع النسخ محفوظة للمالك 𝔼ℕ𝔾 𝕆𝕄𝔸ℝ
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+                    <div class="bg-gray-900 p-6 rounded-lg border border-gray-800">
+                        <i class="fas fa-laptop-code text-4xl mb-4 blood-text"></i>
+                        <h3 class="text-xl font-bold mb-2">17 مرحلة تعليمية</h3>
+                        <p>مسار متكامل من الصفر حتى الاحتراف</p>
+                    </div>
+                    <div class="bg-gray-900 p-6 rounded-lg border border-gray-800">
+                        <i class="fas fa-tasks text-4xl mb-4 blood-text"></i>
+                        <h3 class="text-xl font-bold mb-2">800+ مهمة تعليمية</h3>
+                        <p>كل مهمة عبارة عن فيديو تعليمي</p>
+                    </div>
+                    <div class="bg-gray-900 p-6 rounded-lg border border-gray-800">
+                        <i class="fas fa-lock text-4xl mb-4 blood-text"></i>
+                        <h3 class="text-xl font-bold mb-2">نظام متسلسل</h3>
+                        <p>لا يمكنك البدء بمرحلة قبل إكمال سابقتها</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Stages Section -->
+        <section id="stages" class="py-16 px-6 bg-gray-900">
+            <div class="container mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center blood-text">المراحل التعليمية</h2>
+                
+                <div class="stage-navigation pb-8">
+                    <div class="flex space-x-4 space-x-reverse" style="min-width: 3400px;">
+                        <!-- Stage 1 -->
+                        <div class="stage-card w-64 flex-shrink-0 bg-gray-800 rounded-lg p-6" data-stage="1">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-400">المرحلة 1</span>
+                                <span class="text-xs bg-red-900 text-red-300 px-2 py-1 rounded">غير مكتمل</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">CS50</h3>
+                            <p class="text-sm text-gray-400 mb-4">82 مهمة</p>
+                            <div class="progress-bar mb-4">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">يجب إكمال هذه المرحلة أولاً</p>
+                            <a href="#stage-details" class="block text-center bg-gray-700 hover:bg-gray-600 text-white py-2 rounded transition view-stage">عرض التفاصيل</a>
+                        </div>
+                        
+                        <!-- Stage 2 -->
+                        <div class="stage-card w-64 flex-shrink-0 bg-gray-800 rounded-lg p-6 locked" data-stage="2">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-400">المرحلة 2</span>
+                                <span class="text-xs bg-gray-900 text-gray-500 px-2 py-1 rounded">مقفل</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">ما قبل تعلم البرمجة</h3>
+                            <p class="text-sm text-gray-400 mb-4">10 مهمات</p>
+                            <div class="progress-bar mb-4">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">يجب إكمال المرحلة 1 أولاً</p>
+                            <a href="#stage-details" class="block text-center bg-gray-900 text-gray-500 py-2 rounded cursor-not-allowed">مقفل</a>
+                        </div>
+                        
+                        <!-- Stage 3 -->
+                        <div class="stage-card w-64 flex-shrink-0 bg-gray-800 rounded-lg p-6 locked" data-stage="3">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-400">المرحلة 3</span>
+                                <span class="text-xs bg-gray-900 text-gray-500 px-2 py-1 rounded">مقفل</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">C++</h3>
+                            <p class="text-sm text-gray-400 mb-4">40 مهمة</p>
+                            <div class="progress-bar mb-4">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">يجب إكمال المرحلة 2 أولاً</p>
+                            <a href="#stage-details" class="block text-center bg-gray-900 text-gray-500 py-2 rounded cursor-not-allowed">مقفل</a>
+                        </div>
+                        
+                        <!-- Stage 4 -->
+                        <div class="stage-card w-64 flex-shrink-0 bg-gray-800 rounded-lg p-6 locked" data-stage="4">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-400">المرحلة 4</span>
+                                <span class="text-xs bg-gray-900 text-gray-500 px-2 py-1 rounded">مقفل</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">OOP</h3>
+                            <p class="text-sm text-gray-400 mb-4">9 مهمات</p>
+                            <div class="progress-bar mb-4">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">يجب إكمال المرحلة 3 أولاً</p>
+                            <a href="#stage-details" class="block text-center bg-gray-900 text-gray-500 py-2 rounded cursor-not-allowed">مقفل</a>
+                        </div>
+                        
+                        <!-- Stage 5 -->
+                        <div class="stage-card w-64 flex-shrink-0 bg-gray-800 rounded-lg p-6 locked" data-stage="5">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-400">المرحلة 5</span>
+                                <span class="text-xs bg-gray-900 text-gray-500 px-2 py-1 rounded">مقفل</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">هياكل البيانات</h3>
+                            <p class="text-sm text-gray-400 mb-4">38 مهمة</p>
+                            <div class="progress-bar mb-4">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">يجب إكمال المرحلة 4 أولاً</p>
+                            <a href="#stage-details" class="block text-center bg-gray-900 text-gray-500 py-2 rounded cursor-not-allowed">مقفل</a>
+                        </div>
+                        
+                        <!-- Stage 6 -->
+                        <div class="stage-card w-64 flex-shrink-0 bg-gray-800 rounded-lg p-6 locked" data-stage="6">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-400">المرحلة 6</span>
+                                <span class="text-xs bg-gray-900 text-gray-500 px-2 py-1 rounded">مقفل</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">الخوارزميات</h3>
+                            <p class="text-sm text-gray-400 mb-4">68 مهمة</p>
+                            <div class="progress-bar mb-4">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">يجب إكمال المرحلة 5 أولاً</p>
+                            <a href="#stage-details" class="block text-center bg-gray-900 text-gray-500 py-2 rounded cursor-not-allowed">مقفل</a>
+                        </div>
+                        
+                        <!-- Stage 7 -->
+                        <div class="stage-card w-64 flex-shrink-0 bg-gray-800 rounded-lg p-6 locked" data-stage="7">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-400">المرحلة 7</span>
+                                <span class="text-xs bg-gray-900 text-gray-500 px-2 py-1 rounded">مقفل</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">حل المشكلات</h3>
+                            <p class="text-sm text-gray-400 mb-4">103 مهمة</p>
+                            <div class="progress-bar mb-4">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">يجب إكمال المرحلة 6 أولاً</p>
+                            <a href="#stage-details" class="block text-center bg-gray-900 text-gray-500 py-2 rounded cursor-not-allowed">مقفل</a>
+                        </div>
+                        
+                        <!-- Stage 8 -->
+                        <div class="stage-card w-64 flex-shrink-0 bg-gray-800 rounded-lg p-6 locked" data-stage="8">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-400">المرحلة 8</span>
+                                <span class="text-xs bg-gray-900 text-gray-500 px-2 py-1 rounded">مقفل</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">قواعد البيانات</h3>
+                            <p class="text-sm text-gray-400 mb-4">11 مهمة</p>
+                            <div class="progress-bar mb-4">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">يجب إكمال المرحلة 7 أولاً</p>
+                            <a href="#stage-details" class="block text-center bg-gray-900 text-gray-500 py-2 rounded cursor-not-allowed">مقفل</a>
+                        </div>
+                        
+                        <!-- Stage 9 -->
+                        <div class="stage-card w-64 flex-shrink-0 bg-gray-800 rounded-lg p-6 locked" data-stage="9">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-400">المرحلة 9</span>
+                                <span class="text-xs bg-gray-900 text-gray-500 px-2 py-1 rounded">مقفل</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">CCNA</h3>
+                            <p class="text-sm text-gray-400 mb-4">49 مهمة</p>
+                            <div class="progress-bar mb-4">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">يجب إكمال المرحلة 8 أولاً</p>
+                            <a href="#stage-details" class="block text-center bg-gray-900 text-gray-500 py-2 rounded cursor-not-allowed">مقفل</a>
+                        </div>
+                        
+                        <!-- Stage 10 -->
+                        <div class="stage-card w-64 flex-shrink-0 bg-gray-800 rounded-lg p-6 locked" data-stage="10">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-400">المرحلة 10</span>
+                                <span class="text-xs bg-gray-900 text-gray-500 px-2 py-1 rounded">مقفل</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">Flutter</h3>
+                            <p class="text-sm text-gray-400 mb-4">117 مهمة</p>
+                            <div class="progress-bar mb-4">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">يجب إكمال المرحلة 9 أولاً</p>
+                            <a href="#stage-details" class="block text-center bg-gray-900 text-gray-500 py-2 rounded cursor-not-allowed">مقفل</a>
+                        </div>
+                        
+                        <!-- Stage 11 -->
+                        <div class="stage-card w-64 flex-shrink-0 bg-gray-800 rounded-lg p-6 locked" data-stage="11">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-400">المرحلة 11</span>
+                                <span class="text-xs bg-gray-900 text-gray-500 px-2 py-1 rounded">مقفل</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">Linux</h3>
+                            <p class="text-sm text-gray-400 mb-4">1 مهمة</p>
+                            <div class="progress-bar mb-4">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">يجب إكمال المرحلة 10 أولاً</p>
+                            <a href="#stage-details" class="block text-center bg-gray-900 text-gray-500 py-2 rounded cursor-not-allowed">مقفل</a>
+                        </div>
+                        
+                        <!-- Stage 12 -->
+                        <div class="stage-card w-64 flex-shrink-0 bg-gray-800 rounded-lg p-6 locked" data-stage="12">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-400">المرحلة 12</span>
+                                <span class="text-xs bg-gray-900 text-gray-500 px-2 py-1 rounded">مقفل</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">الإحصاء</h3>
+                            <p class="text-sm text-gray-400 mb-4">24 مهمة</p>
+                            <div class="progress-bar mb-4">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">يجب إكمال المرحلة 11 أولاً</p>
+                            <a href="#stage-details" class="block text-center bg-gray-900 text-gray-500 py-2 rounded cursor-not-allowed">مقفل</a>
+                        </div>
+                        
+                        <!-- Stage 13 -->
+                        <div class="stage-card w-64 flex-shrink-0 bg-gray-800 rounded-lg p-6 locked" data-stage="13">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-400">المرحلة 13</span>
+                                <span class="text-xs bg-gray-900 text-gray-500 px-2 py-1 rounded">مقفل</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">الاحتمالات</h3>
+                            <p class="text-sm text-gray-400 mb-4">44 مهمة</p>
+                            <div class="progress-bar mb-4">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">يجب إكمال المرحلة 12 أولاً</p>
+                            <a href="#stage-details" class="block text-center bg-gray-900 text-gray-500 py-2 rounded cursor-not-allowed">مقفل</a>
+                        </div>
+                        
+                        <!-- Stage 14 -->
+                        <div class="stage-card w-64 flex-shrink-0 bg-gray-800 rounded-lg p-6 locked" data-stage="14">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-400">المرحلة 14</span>
+                                <span class="text-xs bg-gray-900 text-gray-500 px-2 py-1 rounded">مقفل</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">HTML</h3>
+                            <p class="text-sm text-gray-400 mb-4">29 مهمة</p>
+                            <div class="progress-bar mb-4">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">يجب إكمال المرحلة 13 أولاً</p>
+                            <a href="#stage-details" class="block text-center bg-gray-900 text-gray-500 py-2 rounded cursor-not-allowed">مقفل</a>
+                        </div>
+                        
+                        <!-- Stage 15 -->
+                        <div class="stage-card w-64 flex-shrink-0 bg-gray-800 rounded-lg p-6 locked" data-stage="15">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-400">المرحلة 15</span>
+                                <span class="text-xs bg-gray-900 text-gray-500 px-2 py-1 rounded">مقفل</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">CSS</h3>
+                            <p class="text-sm text-gray-400 mb-4">53 مهمة</p>
+                            <div class="progress-bar mb-4">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">يجب إكمال المرحلة 14 أولاً</p>
+                            <a href="#stage-details" class="block text-center bg-gray-900 text-gray-500 py-2 rounded cursor-not-allowed">مقفل</a>
+                        </div>
+                        
+                        <!-- Stage 16 -->
+                        <div class="stage-card w-64 flex-shrink-0 bg-gray-800 rounded-lg p-6 locked" data-stage="16">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-400">المرحلة 16</span>
+                                <span class="text-xs bg-gray-900 text-gray-500 px-2 py-1 rounded">مقفل</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">JavaScript</h3>
+                            <p class="text-sm text-gray-400 mb-4">80 مهمة</p>
+                            <div class="progress-bar mb-4">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">يجب إكمال المرحلة 15 أولاً</p>
+                            <a href="#stage-details" class="block text-center bg-gray-900 text-gray-500 py-2 rounded cursor-not-allowed">مقفل</a>
+                        </div>
+                        
+                        <!-- Stage 17 -->
+                        <div class="stage-card w-64 flex-shrink-0 bg-gray-800 rounded-lg p-6 locked" data-stage="17">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-gray-400">المرحلة 17</span>
+                                <span class="text-xs bg-gray-900 text-gray-500 px-2 py-1 rounded">مقفل</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">Python</h3>
+                            <p class="text-sm text-gray-400 mb-4">53 مهمة</p>
+                            <div class="progress-bar mb-4">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">يجب إكمال المرحلة 16 أولاً</p>
+                            <a href="#stage-details" class="block text-center bg-gray-900 text-gray-500 py-2 rounded cursor-not-allowed">مقفل</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Stage Details Section -->
+        <section id="stage-details" class="py-16 px-6">
+            <div class="container mx-auto">
+                <!-- Stage 1 Details -->
+                <div class="stage-details bg-gray-900 rounded-lg p-8 border border-gray-800 active" data-stage="1">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <h2 class="text-2xl md:text-3xl font-bold blood-text">CS50</h2>
+                            <p class="text-gray-400">المرحلة 1 - 82 مهمة</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xl mb-1">0% مكتمل</div>
+                            <div class="progress-bar w-48">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold mb-4 blood-text">عن المرحلة</h3>
+                        <p class="text-gray-400 mb-4">
+                            هذه هي المرحلة الأولى في مسار تعلم البرمجة، وهي مقدمة شاملة لعلوم الحاسب من خلال كورس CS50 الشهير من هارفارد.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <a href="https://youtube.com/playlist?list=PLknwEmKsW8OvsdJ64v5YljHNtt100kN6w&si=aSh8KAERzTOp5RMB" target="_blank" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-full text-sm flex items-center">
+                                <i class="fab fa-youtube mr-2 text-red-500"></i> قائمة التشغيل
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-xl font-bold mb-4 blood-text">المهام</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Tasks will be generated dynamically -->
+                        </div>
+                        
+                        <div class="mt-8 text-center">
+                            <button class="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-full border border-gray-700 transition">
+                                عرض المزيد من المهام <i class="fas fa-arrow-down ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stage 2 Details -->
+                <div class="stage-details bg-gray-900 rounded-lg p-8 border border-gray-800" data-stage="2">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <h2 class="text-2xl md:text-3xl font-bold blood-text">ما قبل تعلم البرمجة</h2>
+                            <p class="text-gray-400">المرحلة 2 - 10 مهمات</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xl mb-1">0% مكتمل</div>
+                            <div class="progress-bar w-48">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold mb-4 blood-text">عن المرحلة</h3>
+                        <p class="text-gray-400 mb-4">
+                            هذه المرحلة تهدف إلى تهيئتك لتعلم البرمجة من خلال فهم الأساسيات والمفاهيم المهمة قبل البدء في تعلم لغات البرمجة.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <a href="https://youtube.com/playlist?list=PLDoPjvoNmBAx8xKvAXpb6f0Urj98Xo7zg&si=svdwTp344wTyNUcO" target="_blank" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-full text-sm flex items-center">
+                                <i class="fab fa-youtube mr-2 text-red-500"></i> قائمة التشغيل
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-xl font-bold mb-4 blood-text">المهام</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Tasks will be generated dynamically -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Other stages details would be here -->
+                <!-- We'll generate them dynamically with JavaScript -->
+            </div>
+        </section>
+        
+        <!-- Contact Section -->
+        <section id="contact" class="py-16 px-6 bg-gray-900">
+            <div class="container mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center blood-text">تواصل معنا</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
+                        <i class="fab fa-youtube text-4xl mb-4 text-red-500"></i>
+                        <h3 class="text-xl font-bold mb-2">قناة اليوتيوب</h3>
+                        <p class="text-gray-400 mb-4">اشترك في القناة لمشاهدة الدروس والشروحات</p>
+                        <a href="https://youtube.com/@omarhmady-1?si=_vl_59G7ltJfhstn" target="_blank" class="inline-block bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded transition">
+                            زيارة القناة
+                        </a>
+                    </div>
+                    
+                    <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
+                        <i class="fab fa-telegram text-4xl mb-4 text-blue-400"></i>
+                        <h3 class="text-xl font-bold mb-2">قناة التليجرام</h3>
+                        <p class="text-gray-400 mb-4">انضم لمجتمعنا على التليجرام</p>
+                        <a href="https://t.me/Gaming402" target="_blank" class="inline-block bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded transition">
+                            الانضمام الآن
+                        </a>
+                    </div>
+                    
+                    <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
+                        <i class="fas fa-envelope text-4xl mb-4 text-yellow-500"></i>
+                        <h3 class="text-xl font-bold mb-2">البريد الإلكتروني</h3>
+                        <p class="text-gray-400 mb-4">تواصل معنا عبر البريد الإلكتروني</p>
+                        <a href="mailto:oamrhamed4321@gmail.com" class="inline-block bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded transition">
+                            إرسال رسالة
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-black py-8 px-6 border-t border-gray-800">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h2 class="text-2xl font-bold blood-text blood-drip">𝔼ℕ𝔾 𝕆𝕄𝔸ℝ</h2>
+                    <p class="text-gray-500 text-sm">مسار تعلم البرمجة الاحترافي</p>
+                </div>
+                <div class="flex space-x-4 space-x-reverse">
+                    <a href="https://youtube.com/@omarhmady-1?si=_vl_59G7ltJfhstn" target="_blank" class="text-gray-400 hover:text-white transition">
+                        <i class="fab fa-youtube text-xl"></i>
+                    </a>
+                    <a href="https://t.me/Gaming402" target="_blank" class="text-gray-400 hover:text-white transition">
+                        <i class="fab fa-telegram text-xl"></i>
+                    </a>
+                    <a href="mailto:oamrhamed4321@gmail.com" class="text-gray-400 hover:text-white transition">
+                        <i class="fas fa-envelope text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="mt-8 text-center text-gray-500 text-sm">
+                <p>جميع الحقوق محفوظة &copy; 2023 𝔼ℕ𝔾 𝕆𝕄𝔸ℝ</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Stage data
+        const stagesData = [
+            {
+                id: 1,
+                title: "CS50",
+                tasks: 82,
+                description: "هذه هي المرحلة الأولى في مسار تعلم البرمجة، وهي مقدمة شاملة لعلوم الحاسب من خلال كورس CS50 الشهير من هارفارد.",
+                youtubeLink: "https://youtube.com/playlist?list=PLknwEmKsW8OvsdJ64v5YljHNtt100kN6w&si=aSh8KAERzTOp5RMB"
+            },
+            {
+                id: 2,
+                title: "ما قبل تعلم البرمجة",
+                tasks: 10,
+                description: "هذه المرحلة تهدف إلى تهيئتك لتعلم البرمجة من خلال فهم الأساسيات والمفاهيم المهمة قبل البدء في تعلم لغات البرمجة.",
+                youtubeLink: "https://youtube.com/playlist?list=PLDoPjvoNmBAx8xKvAXpb6f0Urj98Xo7zg&si=svdwTp344wTyNUcO"
+            },
+            {
+                id: 3,
+                title: "C++",
+                tasks: 40,
+                description: "في هذه المرحلة ستتعلم لغة C++ من الصفر حتى الاحتراف مع فهم المفاهيم الأساسية والمتقدمة.",
+                youtubeLinks: [
+                    "https://youtu.be/07AC2Syf4Yg?si=WDzr7avrvtX9kqV6",
+                    "https://youtube.com/playlist?list=PLCInYL3l2AajFAiw4s1U4QbGszcQ-rAb3&si=i8SgXFfbzhI8Hyy6",
+                    "https://youtu.be/gAKDUIQCeKM?si=OV1P4vTZvcWEctff"
+                ]
+            },
+            {
+                id: 4,
+                title: "OOP",
+                tasks: 9,
+                description: "هذه المرحلة تركز على البرمجة الكائنية التوجه (OOP) وهي من أهم المفاهيم في البرمجة الحديثة.",
+                youtubeLinks: [
+                    "https://youtu.be/aJG-KnmfFxM?si=H8oF71c2SkWupDZM",
+                    "https://youtu.be/e8o481vejaQ?si=QasgBiXwJqMrDrFQ"
+                ]
+            },
+            {
+                id: 5,
+                title: "هياكل البيانات",
+                tasks: 38,
+                description: "في هذه المرحلة ستتعلم هياكل البيانات المختلفة وكيفية استخدامها بشكل فعال في البرمجة.",
+                youtubeLink: "https://youtube.com/playlist?list=PLCInYL3l2AajqOUW_2SwjWeMwf4vL4RSp&si=2F0FxAACMos-g0xz"
+            },
+            {
+                id: 6,
+                title: "الخوارزميات",
+                tasks: 68,
+                description: "هذه المرحلة تركز على فهم الخوارزميات وكيفية تحليل كفاءتها وتنفيذها بشكل صحيح.",
+                youtubeLink: "https://youtube.com/playlist?list=PLL2zWZTDFZzjxarUL23ydiOgibhRipGYC&si=-W7SqbBKz46WFKQa"
+            },
+            {
+                id: 7,
+                title: "حل المشكلات",
+                tasks: 103,
+                description: "في هذه المرحلة ستتعلم كيفية تحليل المشكلات البرمجية وإيجاد الحلول المناسبة لها.",
+                youtubeLinks: [
+                    "https://youtu.be/0QD0CwOUX5E?si=Jdrb03pXUQSQ1W5t",
+                    "https://youtube.com/playlist?list=PLDoPjvoNmBAyX4CCOP--TR36SfD5g7gru&si=PetKQkv-NJxDsYvQ"
+                ]
+            },
+            {
+                id: 8,
+                title: "قواعد البيانات",
+                tasks: 11,
+                description: "هذه المرحلة تقدم مفاهيم قواعد البيانات العلائقية وكيفية التعامل معها باستخدام SQL.",
+                youtubeLink: "https://youtube.com/playlist?list=PLknwEmKsW8OveN7SrZN5QjwyXLBzUDkJB&si=kaBh_swDDJnzg5fS"
+            },
+            {
+                id: 9,
+                title: "CCNA",
+                tasks: 49,
+                description: "في هذه المرحلة ستتعلم أساسيات الشبكات والحصول على شهادة CCNA المعتمدة من سيسكو.",
+                youtubeLinks: [
+                    "https://youtube.com/playlist?list=PL8s4OGp06499sD76hhwURj6vKDPPMhxHD&si=vG4DK9K_on_Nwo8c",
+                    "https://youtube.com/playlist?list=PLZmPGUyBFvUrvoa-NYzcUWFpxoZR11id_&si=mnxbZlKpQYbavGeH"
+                ]
+            },
+            {
+                id: 10,
+                title: "Flutter",
+                tasks: 117,
+                description: "هذه المرحلة تركز على تعلم إطار عمل Flutter لتطوير تطبيقات الهجينة لنظامي Android و iOS.",
+                youtubeLink: "https://youtube.com/playlist?list=PLw6Y5u47CYq47oDw63bMqkq06fjuoK_GJ&si=Np04IOdpdr0EqBvD"
+            },
+            {
+                id: 11,
+                title: "Linux",
+                tasks: 1,
+                description: "في هذه المرحلة ستتعلم أساسيات نظام التشغيل Linux والأوامر الأساسية للتعامل معه.",
+                youtubeLink: "https://youtu.be/OxL0B1F65W8?si=rM_EiEymlU1-1qn4"
+            },
+            {
+                id: 12,
+                title: "الإحصاء",
+                tasks: 24,
+                description: "هذه المرحلة تقدم مفاهيم الإحصاء الأساسية والمتقدمة التي يحتاجها المبرمج في تحليل البيانات.",
+                youtubeLinks: [
+                    "https://youtu.be/K9teElePNkk?si=KpCpVJmPkXi7RIeV",
+                    "https://youtube.com/playlist?list=PLVpJGVBmPnw3eRSzC90oXA6gBcG-nEYIe&si=78TNOJm8pImoy3bn"
+                ]
+            },
+            {
+                id: 13,
+                title: "الاحتمالات",
+                tasks: 44,
+                description: "في هذه المرحلة ستتعلم نظرية الاحتمالات وتطبيقاتها في علوم الحاسب والذكاء الاصطناعي.",
+                youtubeLink: "https://youtube.com/playlist?list=PLMrJAkhIeNNR3sNYvfgiKgcStwuPSts9V&si=PESKavyAOufJsGY1"
+            },
+            {
+                id: 14,
+                title: "HTML",
+                tasks: 29,
+                description: "هذه المرحلة تركز على تعلم لغة HTML لإنشاء هيكل صفحات الويب.",
+                youtubeLinks: [
+                    "https://youtu.be/cvNTgKw8VlY?si=F5ZrUQr6vD2hl2CP",
+                    "https://youtube.com/playlist?list=PLknwEmKsW8OvX7kZhsv6I6tT8SKDXDwUc&si=Uj5rtNv73Ywep2Wa"
+                ]
+            },
+            {
+                id: 15,
+                title: "CSS",
+                tasks: 53,
+                description: "في هذه المرحلة ستتعلم لغة CSS لتنسيق وتجميل صفحات الويب.",
+                youtubeLinks: [
+                    "https://youtu.be/h1mNPEjva8U?si=2ogSPgQU8PEsCl_n",
+                    "https://youtube.com/playlist?list=PLknwEmKsW8OuN04Odt2sJqt4aAnkp-iYA&si=APoXEzSNeh-hQQ5"
+                ]
+            },
+            {
+                id: 16,
+                title: "JavaScript",
+                tasks: 80,
+                description: "هذه المرحلة تركز على تعلم لغة JavaScript لإضافة التفاعل إلى صفحات الويب.",
+                youtubeLink: "https://youtube.com/playlist?list=PLknwEmKsW8OuTqUDaFRBiAViDZ5uI3VcE&si=yea4GQik7uAGv60z"
+            },
+            {
+                id: 17,
+                title: "Python",
+                tasks: 53,
+                description: "في هذه المرحلة ستتعلم لغة Python من الصفر حتى الاحتراف مع تطبيقاتها المختلفة.",
+                youtubeLink: "https://youtube.com/playlist?list=PLknwEmKsW8OsG8dnisr-2WGyx7lpgGEE&si=lY2m3VJuHYzP8Daw"
+            }
+        ];
+
+        // Create blood drops
+        function createBloodDrops() {
+            const container = document.getElementById('blood-drops');
+            const dropsCount = 20;
+            
+            for (let i = 0; i < dropsCount; i++) {
+                const drop = document.createElement('div');
+                drop.className = 'blood-drop';
+                
+                // Random position
+                const left = Math.random() * 100;
+                const delay = Math.random() * 5;
+                const duration = 2 + Math.random() * 3;
+                
+                drop.style.left = `${left}%`;
+                drop.style.top = `${-10 - Math.random() * 20}px`;
+                drop.style.animationDelay = `${delay}s`;
+                drop.style.animationDuration = `${duration}s`;
+                
+                container.appendChild(drop);
+            }
+        }
+        
+        // Generate tasks for a stage
+        function generateTasks(stageId, container) {
+            const stage = stagesData.find(s => s.id === stageId);
+            if (!stage) return;
+            
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= stage.tasks; i++) {
+                const taskElement = document.createElement('div');
+                taskElement.className = 'task-item bg-gray-800 p-4 rounded';
+                taskElement.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-medium">فيديو ${i}</span>
+                        <button class="complete-btn text-gray-400 hover:text-green-500" data-task="${i}">
+                            <i class="far fa-circle"></i>
+                        </button>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-500">
+                        <span>0% مكتمل</span>
+                        <span>غير مكتمل</span>
+                    </div>
+                `;
+                container.appendChild(taskElement);
+            }
+            
+            // Add event listeners to the new buttons
+            setupTaskCompletion();
+        }
+        
+        // Task completion functionality
+        function setupTaskCompletion() {
+            const completeButtons = document.querySelectorAll('.complete-btn');
+            
+            completeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const icon = this.querySelector('i');
+                    const taskId = this.getAttribute('data-task');
+                    
+                    if (icon.classList.contains('fa-circle')) {
+                        icon.classList.remove('fa-circle');
+                        icon.classList.add('fa-check-circle', 'completed');
+                        
+                        // Update task status
+                        const taskItem = this.closest('.task-item');
+                        const statusText = taskItem.querySelector('span:last-child');
+                        statusText.textContent = 'مكتمل';
+                        statusText.classList.add('text-green-500');
+                        
+                        // Update progress
+                        updateStageProgress();
+                    }
+                });
+            });
+        }
+        
+        // Update stage progress
+        function updateStageProgress() {
+            const activeStage = document.querySelector('.stage-details.active');
+            const stageId = parseInt(activeStage.getAttribute('data-stage'));
+            
+            const completedTasks = activeStage.querySelectorAll('.fa-check-circle').length;
+            const totalTasks = stagesData.find(s => s.id === stageId).tasks;
+            const progress = (completedTasks / totalTasks) * 100;
+            
+            // Update progress bars in details
+            activeStage.querySelectorAll('.progress-fill').forEach(bar => {
+                bar.style.width = `${progress}%`;
+            });
+            
+            // Update percentage text in details
+            activeStage.querySelectorAll('.text-xl.mb-1').forEach(el => {
+                el.textContent = `${Math.round(progress)}% مكتمل`;
+            });
+            
+            // Update stage card progress
+            const stageCard = document.querySelector(`.stage-card[data-stage="${stageId}"]`);
+            if (stageCard) {
+                stageCard.querySelectorAll('.progress-fill').forEach(bar => {
+                    bar.style.width = `${progress}%`;
+                });
+                
+                // Update stage status if completed
+                if (progress >= 100) {
+                    const statusElement = stageCard.querySelector('.bg-red-900');
+                    if (statusElement) {
+                        statusElement.classList.replace('bg-red-900', 'bg-green-900');
+                        statusElement.classList.replace('text-red-300', 'text-green-300');
+                        statusElement.textContent = 'مكتمل';
+                        
+                        // Unlock next stage
+                        if (stageId < 17) {
+                            const nextStage = document.querySelector(`.stage-card[data-stage="${stageId + 1}"]`);
+                            if (nextStage) {
+                                nextStage.classList.remove('locked');
+                                nextStage.querySelector('.bg-gray-900').classList.replace('bg-gray-900', 'bg-red-900');
+                                nextStage.querySelector('.text-gray-500').classList.replace('text-gray-500', 'text-red-300');
+                                nextStage.querySelector('.bg-gray-900').textContent = 'غير مكتمل';
+                                nextStage.querySelector('a').classList.replace('bg-gray-900', 'bg-gray-700');
+                                nextStage.querySelector('a').classList.replace('text-gray-500', 'text-white');
+                                nextStage.querySelector('a').classList.replace('cursor-not-allowed', 'hover:bg-gray-600');
+                                nextStage.querySelector('a').textContent = 'عرض التفاصيل';
+                                nextStage.querySelector('a').classList.add('view-stage');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Show stage details
+        function showStageDetails(stageId) {
+            // Hide all stage details
+            document.querySelectorAll('.stage-details').forEach(detail => {
+                detail.classList.remove('active');
+            });
+            
+            // Show the selected stage details
+            const stageDetail = document.querySelector(`.stage-details[data-stage="${stageId}"]`);
+            if (stageDetail) {
+                stageDetail.classList.add('active');
+                
+                // Generate tasks if not already generated
+                const tasksContainer = stageDetail.querySelector('.grid');
+                if (tasksContainer.children.length === 0) {
+                    generateTasks(stageId, tasksContainer);
+                }
+                
+                // Scroll to details section
+                window.scrollTo({
+                    top: document.getElementById('stage-details').offsetTop - 80,
+                    behavior: 'smooth'
+                });
+            }
+        }
+        
+        // Smooth scrolling for navigation
+        function setupSmoothScrolling() {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                        
+                        // Update active nav link
+                        document.querySelectorAll('.nav-link').forEach(link => {
+                            link.classList.remove('active-nav');
+                        });
+                        this.classList.add('active-nav');
+                    }
+                });
+            });
+        }
+        
+        // Mobile menu functionality
+        function setupMobileMenu() {
+            const openMenuButton = document.getElementById('open-menu');
+            const closeMenuButton = document.getElementById('close-menu');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            openMenuButton.addEventListener('click', function() {
+                mobileMenu.classList.add('open');
+            });
+            
+            closeMenuButton.addEventListener('click', function() {
+                mobileMenu.classList.remove('open');
+            });
+            
+            // Close menu when clicking on a link
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function() {
+                    mobileMenu.classList.remove('open');
+                });
+            });
+        }
+        
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            createBloodDrops();
+            setupTaskCompletion();
+            setupSmoothScrolling();
+            setupMobileMenu();
+            
+            // Add event listeners to stage cards
+            document.querySelectorAll('.view-stage').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const stageCard = this.closest('.stage-card');
+                    const stageId = parseInt(stageCard.getAttribute('data-stage'));
+                    showStageDetails(stageId);
+                });
+            });
+            
+            // Generate initial tasks for stage 1
+            const stage1TasksContainer = document.querySelector('.stage-details.active .grid');
+            generateTasks(1, stage1TasksContainer);
+        });
+    </script>
+</body>
+</html>
