@@ -169,11 +169,35 @@
             background: #d10000;
             border-radius: 10px;
         }
+        
+        .save-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #00aa00;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .save-notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body class="min-h-screen">
     <!-- Blood drops decoration -->
     <div id="blood-drops"></div>
+    
+    <!-- Save Notification -->
+    <div id="save-notification" class="save-notification">
+        <i class="fas fa-check-circle mr-2"></i> تم حفظ التقدم تلقائياً
+    </div>
     
     <!-- Mobile Menu -->
     <div id="mobile-menu" class="mobile-menu fixed inset-y-0 right-0 w-64 bg-black z-50 p-6 border-l border-gray-800">
@@ -564,7 +588,7 @@
                     <div class="mb-8">
                         <h3 class="text-xl font-bold mb-4 blood-text">عن المرحلة</h3>
                         <p class="text-gray-400 mb-4">
-                            هذه المرحلة تهدف إلى تهيئتك لتعلم البرمجة من خلال فهم الأساسيات والمفاهيم المهمة قبل البدء في تعلم لغات البرمجة.
+                            هذه المرحلة تهدف إلى تهيئتك لتعلم البرmجة من خلال فهم الأساسيات والمفاهيم المهمة قبل البدء في تعلم لغات البرمجة.
                         </p>
                         <div class="flex flex-wrap gap-2">
                             <a href="https://youtube.com/playlist?list=PLDoPjvoNmBAx8xKvAXpb6f0Urj98Xo7zg&si=svdwTp344wTyNUcO" target="_blank" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-full text-sm flex items-center">
@@ -818,6 +842,60 @@
             }
         }
         
+        // Show save notification
+        function showSaveNotification() {
+            const notification = document.getElementById('save-notification');
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+        
+        // Save progress to localStorage
+        function saveProgress() {
+            const progress = {};
+            
+            stagesData.forEach(stage => {
+                const stageElement = document.querySelector(`.stage-details[data-stage="${stage.id}"]`);
+                if (stageElement) {
+                    const completedTasks = stageElement.querySelectorAll('.fa-check-circle').length;
+                    progress[`stage-${stage.id}`] = completedTasks;
+                }
+            });
+            
+            localStorage.setItem('codingPathProgress', JSON.stringify(progress));
+            showSaveNotification();
+        }
+        
+        // Load progress from localStorage
+        function loadProgress() {
+            const progress = JSON.parse(localStorage.getItem('codingPathProgress')) || {};
+            
+            stagesData.forEach(stage => {
+                const completedTasks = progress[`stage-${stage.id}`] || 0;
+                
+                // Update stage details if they exist
+                const stageElement = document.querySelector(`.stage-details[data-stage="${stage.id}"]`);
+                if (stageElement) {
+                    const taskButtons = stageElement.querySelectorAll('.complete-btn');
+                    for (let i = 0; i < completedTasks && i < taskButtons.length; i++) {
+                        const icon = taskButtons[i].querySelector('i');
+                        icon.classList.remove('fa-circle');
+                        icon.classList.add('fa-check-circle', 'completed');
+                        
+                        const taskItem = taskButtons[i].closest('.task-item');
+                        const statusText = taskItem.querySelector('span:last-child');
+                        statusText.textContent = 'مكتمل';
+                        statusText.classList.add('text-green-500');
+                    }
+                    
+                    // Update progress display
+                    updateStageProgressDisplay(stage.id);
+                }
+            });
+        }
+        
         // Generate tasks for a stage
         function generateTasks(stageId, container) {
             const stage = stagesData.find(s => s.id === stageId);
@@ -845,6 +923,9 @@
             
             // Add event listeners to the new buttons
             setupTaskCompletion();
+            
+            // Load saved progress for this stage
+            loadProgress();
         }
         
         // Task completion functionality
@@ -868,27 +949,45 @@
                         
                         // Update progress
                         updateStageProgress();
+                        
+                        // Save progress
+                        saveProgress();
+                    } else {
+                        icon.classList.remove('fa-check-circle', 'completed');
+                        icon.classList.add('fa-circle');
+                        
+                        // Update task status
+                        const taskItem = this.closest('.task-item');
+                        const statusText = taskItem.querySelector('span:last-child');
+                        statusText.textContent = 'غير مكتمل';
+                        statusText.classList.remove('text-green-500');
+                        
+                        // Update progress
+                        updateStageProgress();
+                        
+                        // Save progress
+                        saveProgress();
                     }
                 });
             });
         }
         
-        // Update stage progress
-        function updateStageProgress() {
-            const activeStage = document.querySelector('.stage-details.active');
-            const stageId = parseInt(activeStage.getAttribute('data-stage'));
+        // Update stage progress display
+        function updateStageProgressDisplay(stageId) {
+            const stageElement = document.querySelector(`.stage-details[data-stage="${stageId}"]`);
+            if (!stageElement) return;
             
-            const completedTasks = activeStage.querySelectorAll('.fa-check-circle').length;
+            const completedTasks = stageElement.querySelectorAll('.fa-check-circle').length;
             const totalTasks = stagesData.find(s => s.id === stageId).tasks;
             const progress = (completedTasks / totalTasks) * 100;
             
             // Update progress bars in details
-            activeStage.querySelectorAll('.progress-fill').forEach(bar => {
+            stageElement.querySelectorAll('.progress-fill').forEach(bar => {
                 bar.style.width = `${progress}%`;
             });
             
             // Update percentage text in details
-            activeStage.querySelectorAll('.text-xl.mb-1').forEach(el => {
+            stageElement.querySelectorAll('.text-xl.mb-1').forEach(el => {
                 el.textContent = `${Math.round(progress)}% مكتمل`;
             });
             
@@ -920,11 +1019,26 @@
                                 nextStage.querySelector('a').classList.replace('cursor-not-allowed', 'hover:bg-gray-600');
                                 nextStage.querySelector('a').textContent = 'عرض التفاصيل';
                                 nextStage.querySelector('a').classList.add('view-stage');
+                                
+                                // Add event listener to the newly unlocked stage
+                                nextStage.querySelector('a').addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    const stageCard = this.closest('.stage-card');
+                                    const stageId = parseInt(stageCard.getAttribute('data-stage'));
+                                    showStageDetails(stageId);
+                                });
                             }
                         }
                     }
                 }
             }
+        }
+        
+        // Update stage progress
+        function updateStageProgress() {
+            const activeStage = document.querySelector('.stage-details.active');
+            const stageId = parseInt(activeStage.getAttribute('data-stage'));
+            updateStageProgressDisplay(stageId);
         }
         
         // Show stage details
@@ -1020,6 +1134,9 @@
             // Generate initial tasks for stage 1
             const stage1TasksContainer = document.querySelector('.stage-details.active .grid');
             generateTasks(1, stage1TasksContainer);
+            
+            // Load saved progress
+            loadProgress();
         });
     </script>
 </body>
